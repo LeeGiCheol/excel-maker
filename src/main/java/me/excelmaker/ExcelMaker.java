@@ -214,17 +214,13 @@ public class ExcelMaker {
 
             useFieldName.get(i).setAccessible(true);
 
-            try {
-                Object cellValue = useFieldName.get(i).get(data);
+            Object cellValue = useFieldName.get(i).get(data);
 
-                sh.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), cellnum, cellnum + columnSize - 1));
+            sh.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), cellnum, cellnum + columnSize - 1));
 
-                cell = row.createCell(cellnum);
-                cell.setCellValue(String.valueOf(cellValue));
-                cellnum += columnSize;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            cell = row.createCell(cellnum);
+            cell.setCellValue(String.valueOf(cellValue));
+            cellnum += columnSize;
         }
     }
 
