@@ -7,8 +7,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.io.FileOutputStream;
-import java.io.UnsupportedEncodingException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -47,17 +47,18 @@ public class ExcelMaker {
     private final Map<String, String> changeFieldName = new HashMap<>();
 
 
-    public void setSheetName(String sheetName) {
+    public ExcelMaker setSheetName(String sheetName) {
         this.sheetName = sheetName;
+        return this;
     }
 
-    public void setFileExtension(String fileExtension) {
+    public ExcelMaker setFileExtension(String fileExtension) {
         this.fileExtension = fileExtension;
+        return this;
     }
 
     public ExcelMaker setRemoveField(String removeField) {
-        this.removeField = removeField;
-        setRemoveFields(removeField);
+        this.removeFields.add(removeField);
         return this;
     }
 
@@ -65,12 +66,9 @@ public class ExcelMaker {
         return removeFields;
     }
 
-    public void setRemoveFields(String removeFields) {
-        this.removeFields.add(removeFields);
-    }
-
-    public void setRemoveFields(List<String> removeFields) {
+    public ExcelMaker setRemoveFields(List<String> removeFields) {
         this.removeFields = removeFields;
+        return this;
     }
 
     private String getChangeFieldName(String fieldName) {
@@ -86,28 +84,16 @@ public class ExcelMaker {
     /**
      * 엑셀을 만든다.
      *
+     * @param response    웹사이트 저장 용도
      * @param voClass     VO 클래스
      * @param dataList    엑셀에 표기할 데이터 리스트
      * @param columnSize  컬럼 가로 길이
      *
      */
-    public void makeExcel(Class<?> voClass, List<?> dataList, int columnSize) {
-        if (columnSize <= 0) {
-            throw new IllegalArgumentException();
-        }
-
+    public void makeExcel(HttpServletResponse response, Class<?> voClass, List<?> dataList, int columnSize) {
         SXSSFWorkbook wb = new SXSSFWorkbook();
 
-        String fileName = this.sheetName;
-
-        try {
-            fileName = new String(fileName.getBytes("UTF-8"), "ISO-8859-1");
-        } catch(UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-
-        try (FileOutputStream output = new FileOutputStream(fileName + this.fileExtension)) {
+        try (OutputStream output = response.getOutputStream()) {
             int cellNum = 0;
             int currentRow = 0;
             String colTitle;
@@ -140,6 +126,13 @@ public class ExcelMaker {
                 setFieldValues(sh, row, allFieldsName, useFieldName, data, columnSize);
             }
 
+            String fileName = this.sheetName;
+            fileName = new String(fileName.getBytes("UTF-8"), "ISO-8859-1");
+
+            response.reset();
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + this.fileExtension + "\"");
+
             wb.write(output);
         } catch(Exception e) {
             e.printStackTrace();
@@ -163,7 +156,6 @@ public class ExcelMaker {
         }
 
         int currentColumn = 0;
-
         for (int i = 0; i < fieldSize; i++) {
             sh.addMergedRegion(new CellRangeAddress(0, 0, currentColumn, currentColumn + columnSize - 1));
             currentColumn += columnSize;
@@ -229,9 +221,7 @@ public class ExcelMaker {
 
             Object cellValue = useFieldName.get(i).get(data);
 
-            if (columnSize != 1) {
-                sh.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), cellnum, cellnum + columnSize - 1));
-            }
+            mergeRowRegion(sh, cellnum, columnSize);
 
             cell = row.createCell(cellnum);
             cell.setCellValue(String.valueOf(cellValue));
