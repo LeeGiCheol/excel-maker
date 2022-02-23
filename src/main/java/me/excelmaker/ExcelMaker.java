@@ -88,6 +88,8 @@ public class ExcelMaker {
      * @param voClass     VO 클래스
      * @param dataList    엑셀에 표기할 데이터 리스트
      * @param columnSize  컬럼 가로 길이
+     * @throws IOException             SXSSFWorkbook.write, HttpServletResponse.getOutputStream, new String(byte[] bytes, String charsetName)
+     * @throws IllegalAccessException  setFieldValues
      *
      */
     public void makeExcel(HttpServletResponse response, Class<?> voClass, List<?> dataList, int columnSize) throws IOException, IllegalAccessException {
