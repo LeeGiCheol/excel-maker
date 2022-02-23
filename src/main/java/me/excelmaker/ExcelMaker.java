@@ -90,7 +90,7 @@ public class ExcelMaker {
      * @param columnSize  컬럼 가로 길이
      *
      */
-    public void makeExcel(HttpServletResponse response, Class<?> voClass, List<?> dataList, int columnSize) {
+    public void makeExcel(HttpServletResponse response, Class<?> voClass, List<?> dataList, int columnSize) throws IOException, IllegalAccessException {
         SXSSFWorkbook wb = new SXSSFWorkbook();
 
         try (OutputStream output = response.getOutputStream()) {
@@ -134,10 +134,7 @@ public class ExcelMaker {
             response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + this.fileExtension + "\"");
 
             wb.write(output);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        finally {
+        } finally {
             wb.dispose();
         }
     }
