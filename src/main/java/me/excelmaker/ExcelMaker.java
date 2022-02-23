@@ -53,7 +53,7 @@ public class ExcelMaker {
     }
 
     public ExcelMaker setFileExtension(String fileExtension) {
-        this.fileExtension = fileExtension;
+        this.fileExtension = "." + fileExtension;
         return this;
     }
 
