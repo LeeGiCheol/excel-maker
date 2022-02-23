@@ -80,6 +80,13 @@ public class ExcelMaker {
         return this;
     }
 
+    /**
+     * makeExcel 사용시 columnSize를 기입하지 않은 경우 기본 값 1을 설정한다.
+     */
+    public void makeExcel(HttpServletResponse response, Class<?> voClass, List<?> dataList) throws IOException, IllegalAccessException {
+        makeExcel(response, voClass, dataList, 1);
+    }
+
 
     /**
      * 엑셀을 만든다.
